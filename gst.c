@@ -28,11 +28,21 @@ GstFlowReturn gstreamer_new_sample_handler(GstElement *object, gpointer user_dat
 int gst_create_pipeline(char *name) {
     gst_init(NULL, NULL);
 
-    const char *pipelineStr = "ximagesrc ! video/x-raw,framerate=10/1 ! videoconvert ! theoraenc ! oggmux ! appsink name=appsink";
+    const char *pipelineStr = "ximagesrc ! video/x-raw,framerate=30/1 ! videoconvert ! vp8enc name=vp8 ! webmmux ! appsink name=appsink";
     GstElement *pipeline = gst_parse_launch(pipelineStr, NULL);
     GstElement *appsink = gst_bin_get_by_name(GST_BIN(pipeline), "appsink");
     g_object_set(appsink, "emit-signals", TRUE, NULL);
     g_signal_connect(appsink, "new-sample", G_CALLBACK(gstreamer_new_sample_handler), NULL);
+
+    GstElement *vp8enc = gst_bin_get_by_name(GST_BIN(pipeline), "vp8");
+    if(!vp8enc) {
+      g_printerr ("Unable to get vp8enc.\n");
+      gst_object_unref (pipeline);
+      return -1;
+    }
+    g_object_set(vp8enc, "min-quantizer", 10, NULL);
+    g_object_set(vp8enc, "max-quantizer", 10, NULL);
+    g_object_set(vp8enc, "cpu-used", 2, NULL);
 
     GstStateChangeReturn ret;
     ret = gst_element_set_state (pipeline, GST_STATE_PLAYING);

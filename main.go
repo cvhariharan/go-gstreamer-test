@@ -9,7 +9,6 @@ import "C"
 import (
 	"log"
 	"os"
-	"time"
 	"unsafe"
 )
 
@@ -18,10 +17,11 @@ var video *os.File
 func main() {
 	C.gst_create_pipeline(C.CString("test-pipeline"))
 
-	video, _ = os.Create("desktop2.ogg")
+	video, _ = os.Create("desktop2.webm")
 	defer video.Close()
 
-	time.Sleep(10 * time.Second)
+	// time.Sleep(10 * time.Second)
+	select {}
 }
 
 //export goHandleSinkBuffer
